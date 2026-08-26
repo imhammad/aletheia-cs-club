@@ -1,12 +1,14 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
+import WhatWeDo from "@/components/WhatWeDo";
 
 export default function Home() {
   return (
     <>
       <Navbar />
-      <main className="min-h-[250vh]">
+      <main>
         <Hero />
+        <WhatWeDo />
       </main>
     </>
   );
