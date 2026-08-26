@@ -2,6 +2,8 @@
 
 import { useRef, type ReactNode } from "react";
 import gsap from "gsap";
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
+
 
 export default function MagneticWrapper({
   children,
@@ -11,8 +13,10 @@ export default function MagneticWrapper({
   strength?: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+    if (prefersReducedMotion) return;
     const el = ref.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
@@ -28,6 +32,7 @@ export default function MagneticWrapper({
   }
 
   function handleMouseLeave() {
+    if (prefersReducedMotion) return;
     const el = ref.current;
     if (!el) return;
     gsap.to(el, { x: 0, y: 0, duration: 0.6, ease: "elastic.out(1, 0.4)" });

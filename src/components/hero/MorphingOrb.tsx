@@ -3,10 +3,11 @@
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
 // All three paths have the identical command structure (M + 4×C + Z, same
-// number of coordinate pairs) so GSAP can tween between them directly —
-// no MorphSVG plugin needed.
+// number of coordinate pairs) so GSAP can tween between them directly,
+
 const BLOB_PATHS = [
   "M100,30 C140,30 170,60 170,100 C170,140 140,170 100,170 C60,170 30,140 30,100 C30,60 60,30 100,30 Z",
   "M100,20 C150,25 180,65 165,110 C155,150 115,175 75,165 C35,155 15,110 30,65 C42,30 70,15 100,20 Z",
@@ -16,9 +17,12 @@ const BLOB_PATHS = [
 export default function MorphingOrb() {
   const pathRef = useRef<SVGPathElement>(null);
   const groupRef = useRef<SVGGElement>(null);
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   useGSAP(() => {
-    // Continuous shape morph — cycles through the blob shapes forever
+    if (prefersReducedMotion) return;
+    
+    // Continuous shape morph, cycles through the blob shapes forever
     const morphTl = gsap.timeline({ repeat: -1, yoyo: true });
     BLOB_PATHS.slice(1).forEach((d) => {
       morphTl.to(pathRef.current, {
@@ -38,7 +42,7 @@ export default function MorphingOrb() {
       yoyo: true,
       ease: "sine.inOut",
     });
-  });
+  }, { dependencies: [prefersReducedMotion] });
 
   return (
     <svg viewBox="0 0 200 200" className="w-full h-full" aria-hidden="true">

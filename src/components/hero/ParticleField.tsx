@@ -3,14 +3,17 @@
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
 const PARTICLE_COUNT = 18;
 
 export default function ParticleField() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   useGSAP(
     () => {
+      if (prefersReducedMotion) return;
       const particles =
         containerRef.current?.querySelectorAll<HTMLSpanElement>(".particle");
 
@@ -34,8 +37,9 @@ export default function ParticleField() {
         });
       });
     },
-    { scope: containerRef }
+    { scope: containerRef, dependencies: [prefersReducedMotion] }
   );
+  if (prefersReducedMotion) return null;
 
   return (
     <div

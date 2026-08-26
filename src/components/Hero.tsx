@@ -5,11 +5,16 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import MorphingOrb from "./hero/MorphingOrb";
 import ParticleField from "./hero/ParticleField";
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
   const orbRef = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = usePrefersReducedMotion();
 
+  // Entrance timeline — always runs once on mount, regardless of the
+  // reduced-motion preference. A short one-time fade-in isn't the kind of
+  // continuous motion that preference is meant to suppress.
   useGSAP(
     () => {
       const tl = gsap.timeline({ delay: 0.3 });
@@ -43,8 +48,16 @@ export default function Hero() {
           "-=0.9"
         )
         .from(".hero-scroll-cue", { opacity: 0, duration: 0.6 }, "-=0.2");
+    },
+    { scope: containerRef }
+  );
 
-      // Cursor parallax — the orb drifts gently toward the mouse position
+  // Cursor parallax — separate effect, gated by the reduced-motion
+  // preference, safe to tear down/rebuild independently of the entrance.
+  useGSAP(
+    () => {
+      if (prefersReducedMotion) return;
+
       const xTo = gsap.quickTo(orbRef.current, "x", {
         duration: 0.8,
         ease: "power3",
@@ -66,7 +79,7 @@ export default function Hero() {
       node?.addEventListener("mousemove", handleMouseMove);
       return () => node?.removeEventListener("mousemove", handleMouseMove);
     },
-    { scope: containerRef }
+    { scope: containerRef, dependencies: [prefersReducedMotion] }
   );
 
   return (
