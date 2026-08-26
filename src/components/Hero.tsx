@@ -4,9 +4,11 @@ import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import MorphingOrb from "./hero/MorphingOrb";
+import ParticleField from "./hero/ParticleField";
 
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const orbRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
@@ -41,6 +43,28 @@ export default function Hero() {
           "-=0.9"
         )
         .from(".hero-scroll-cue", { opacity: 0, duration: 0.6 }, "-=0.2");
+
+      // Cursor parallax — the orb drifts gently toward the mouse position
+      const xTo = gsap.quickTo(orbRef.current, "x", {
+        duration: 0.8,
+        ease: "power3",
+      });
+      const yTo = gsap.quickTo(orbRef.current, "y", {
+        duration: 0.8,
+        ease: "power3",
+      });
+
+      function handleMouseMove(e: MouseEvent) {
+        const rect = containerRef.current!.getBoundingClientRect();
+        const relX = (e.clientX - rect.left) / rect.width - 0.5;
+        const relY = (e.clientY - rect.top) / rect.height - 0.5;
+        xTo(relX * 40);
+        yTo(relY * 40);
+      }
+
+      const node = containerRef.current;
+      node?.addEventListener("mousemove", handleMouseMove);
+      return () => node?.removeEventListener("mousemove", handleMouseMove);
     },
     { scope: containerRef }
   );
@@ -61,8 +85,13 @@ export default function Hero() {
         }}
       />
 
+      <ParticleField />
+
       {/* Morphing glass orb */}
-      <div className="hero-orb absolute w-[420px] h-[420px] md:w-[560px] md:h-[560px] opacity-70 blur-[2px]">
+      <div
+        ref={orbRef}
+        className="hero-orb absolute w-[420px] h-[420px] md:w-[560px] md:h-[560px] opacity-70 blur-[2px]"
+      >
         <MorphingOrb />
       </div>
 
