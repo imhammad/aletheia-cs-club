@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
+import { usePrefersReducedMotion } from "../../hooks/usePrefersReducedMotion";
 
 // All three paths have the identical command structure (M + 4×C + Z, same
 // number of coordinate pairs) so GSAP can tween between them directly,

@@ -2,7 +2,7 @@
 
 import { useRef, type ReactNode } from "react";
 import gsap from "gsap";
-import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
+import { usePrefersReducedMotion } from "../hooks/usePrefersReducedMotion";
 
 
 export default function MagneticWrapper({

@@ -5,7 +5,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import MorphingOrb from "./hero/MorphingOrb";
 import ParticleField from "./hero/ParticleField";
-import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
+import { usePrefersReducedMotion } from "../hooks/usePrefersReducedMotion";
 
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);

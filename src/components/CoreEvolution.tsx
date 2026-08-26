@@ -129,45 +129,110 @@ const PARTICLE_SEEDS = Array.from({ length: NUM_PARTICLES }, (_, i) => ({
 
 function getParticlePosition(
   index: number,
-  globalProgress: number,
+  particleFrom: number,
+  particleTo: number,
+  particleLocalT: number,
   idleRotation: number
 ) {
-  const numTransitions = STAGE_POINTS.length - 1;
-  const clamped = Math.min(Math.max(globalProgress, 0), numTransitions);
-  const stageIndex = Math.min(Math.floor(clamped), numTransitions - 1);
-  const localT = clamped - stageIndex;
-
-  const from = STAGE_POINTS[stageIndex][index];
-  const to = STAGE_POINTS[stageIndex + 1][index];
+  const from = STAGE_POINTS[particleFrom][index];
+  const to = STAGE_POINTS[particleTo][index];
   const seed = PARTICLE_SEEDS[index];
 
-  const shatterAmount = Math.sin(localT * Math.PI);
-  const angle = seed.angle + localT * Math.PI * seed.spin * 1.5;
+  const shatterAmount = Math.sin(particleLocalT * Math.PI);
+  const angle = seed.angle + particleLocalT * Math.PI * seed.spin * 1.2;
   const offsetX = Math.cos(angle) * seed.radius * shatterAmount;
   const offsetY = Math.sin(angle) * seed.radius * shatterAmount;
 
   const wobbleX = Math.cos(idleRotation * 2 + index) * 2.2;
   const wobbleY = Math.sin(idleRotation * 2 + index * 1.3) * 2.2;
 
-  const baseX = from[0] + (to[0] - from[0]) * localT;
-  const baseY = from[1] + (to[1] - from[1]) * localT;
+  const baseX = from[0] + (to[0] - from[0]) * particleLocalT;
+  const baseY = from[1] + (to[1] - from[1]) * particleLocalT;
 
   return {
     x: baseX + offsetX + wobbleX,
     y: baseY + offsetY + wobbleY,
-    opacity: 1 - shatterAmount * 0.6,
     r: 2.6 - shatterAmount * 0.8,
   };
 }
 
-// How close to a given stage (0-3) the current scroll progress must be
-// before that stage's structural detail (glyphs/lines/iris) becomes
-// visible. Multiplying distance by 3 means it only shows up in roughly
-// the final third of approach/departure — tight enough that it's gone
-// well before the particles start noticeably scattering again.
-function stageDetailOpacity(stageIndex: number, globalProgress: number) {
-  const distance = Math.abs(globalProgress - stageIndex);
-  return Math.max(0, 1 - distance * 3);
+// --- timeline: alternating "hold" (formed + zooming) and "transition"
+// (shattering/reforming) segments, in fixed scroll-distance units ---
+
+const HOLD_UNITS = 1; // how long each formed shape lingers & zooms
+const TRANS_UNITS = 1; // how long each shatter/reform takes (higher = slower)
+const FADE = 0.18; // fraction of a hold used to crossfade in/out
+
+type Segment =
+  | { type: "hold"; stage: number; start: number; length: number }
+  | {
+      type: "transition";
+      from: number;
+      to: number;
+      start: number;
+      length: number;
+    };
+
+function buildSegments(numStages: number): Segment[] {
+  const segments: Segment[] = [];
+  let cursor = 0;
+  for (let stage = 0; stage < numStages; stage++) {
+    segments.push({ type: "hold", stage, start: cursor, length: HOLD_UNITS });
+    cursor += HOLD_UNITS;
+    if (stage < numStages - 1) {
+      segments.push({
+        type: "transition",
+        from: stage,
+        to: stage + 1,
+        start: cursor,
+        length: TRANS_UNITS,
+      });
+      cursor += TRANS_UNITS;
+    }
+  }
+  return segments;
+}
+
+const SEGMENTS = buildSegments(STAGE_POINTS.length);
+const TOTAL_UNITS =
+  SEGMENTS[SEGMENTS.length - 1].start + SEGMENTS[SEGMENTS.length - 1].length;
+
+function getTimelineState(progress: number) {
+  const clamped = Math.min(Math.max(progress, 0), TOTAL_UNITS);
+  const segment =
+    SEGMENTS.find((s) => clamped < s.start + s.length) ??
+    SEGMENTS[SEGMENTS.length - 1];
+  const localT = Math.min(
+    Math.max((clamped - segment.start) / segment.length, 0),
+    1
+  );
+
+     if (segment.type === "hold") {
+    const isFirstHold = segment.stage === 0;
+    const isFinalHold = segment.stage === STAGE_POINTS.length - 1;
+    let detailOpacity = 1;
+    if (!isFirstHold && localT < FADE) detailOpacity = localT / FADE;
+    else if (!isFinalHold && localT > 1 - FADE)
+      detailOpacity = (1 - localT) / FADE;
+    const zoomScale = 0.85 + localT * 0.35;
+    return {
+      particleFrom: segment.stage,
+      particleTo: segment.stage,
+      particleLocalT: 0,
+      detailStage: segment.stage,
+      detailOpacity,
+      zoomScale,
+    };
+  }
+
+  return {
+    particleFrom: segment.from,
+    particleTo: segment.to,
+    particleLocalT: localT,
+    detailStage: -1,
+    detailOpacity: 0,
+    zoomScale: 0.85,
+  };
 }
 
 export default function CoreEvolution() {
@@ -186,13 +251,12 @@ export default function CoreEvolution() {
       const progressState = { value: 0 };
 
       gsap.to(progressState, {
-        value: STAGE_POINTS.length - 1,
+        value: TOTAL_UNITS,
         ease: "none",
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top top",
-          end: () =>
-            `+=${window.innerHeight * (STAGE_POINTS.length - 1) * 1.4}`,
+          end: () => `+=${window.innerHeight * TOTAL_UNITS}`,
           scrub: 1,
           pin: true,
           invalidateOnRefresh: true,
@@ -200,63 +264,53 @@ export default function CoreEvolution() {
       });
 
       let idleRotation = 0;
+      const detailGroups = [
+        dataTextRef,
+        circuitGroupRef,
+        networkGroupRef,
+        eyeGroupRef,
+      ];
 
       function render() {
         if (!prefersReducedMotion) {
           idleRotation += 0.0015;
         }
 
-        // How "settled" the current view is — 1 means a shape's structural
-        // detail is fully shown, so the raw particles should be invisible.
-        const nearestStage = Math.round(progressState.value);
-        const detailStrength = stageDetailOpacity(
-          nearestStage,
-          progressState.value
-        );
+        const state = getTimelineState(progressState.value);
+        const particleOpacity = 1 - state.detailOpacity;
 
         particleRefs.current.forEach((el, i) => {
           if (!el) return;
-          const { x, y, opacity, r } = getParticlePosition(
+          const { x, y, r } = getParticlePosition(
             i,
-            progressState.value,
+            state.particleFrom,
+            state.particleTo,
+            state.particleLocalT,
             idleRotation
           );
           el.setAttribute("cx", x.toFixed(2));
           el.setAttribute("cy", y.toFixed(2));
-          el.setAttribute("opacity", (opacity * (1 - detailStrength)).toFixed(2));
+          el.setAttribute("opacity", particleOpacity.toFixed(2));
           el.setAttribute("r", r.toFixed(2));
+        });
+
+        detailGroups.forEach((ref, i) => {
+          if (!ref.current) return;
+          const isActive = i === state.detailStage;
+          ref.current.style.opacity = String(isActive ? state.detailOpacity : 0);
+          ref.current.style.transform = `scale(${isActive ? state.zoomScale : 0.85})`;
+          ref.current.style.transformOrigin = "210px 140px";
         });
 
         captionRefs.current.forEach((el, i) => {
           if (!el) return;
-          const opacity = stageDetailOpacity(i, progressState.value);
+          const opacity = i === state.detailStage ? state.detailOpacity : 0;
           el.style.opacity = String(opacity);
           el.style.transform = `translateY(${(1 - opacity) * 14}px)`;
         });
 
-        if (dataTextRef.current) {
-          dataTextRef.current.style.opacity = String(
-            stageDetailOpacity(0, progressState.value)
-          );
-        }
-        if (circuitGroupRef.current) {
-          circuitGroupRef.current.style.opacity = String(
-            stageDetailOpacity(1, progressState.value)
-          );
-        }
-        if (networkGroupRef.current) {
-          networkGroupRef.current.style.opacity = String(
-            stageDetailOpacity(2, progressState.value)
-          );
-        }
-        if (eyeGroupRef.current) {
-          eyeGroupRef.current.style.opacity = String(
-            stageDetailOpacity(3, progressState.value)
-          );
-        }
-
         if (glowRef.current) {
-          const t = progressState.value / (STAGE_POINTS.length - 1);
+          const t = progressState.value / TOTAL_UNITS;
           glowRef.current.style.opacity = String(0.12 + t * 0.38);
           glowRef.current.style.transform = `scale(${1 + t * 0.7})`;
         }
@@ -306,7 +360,6 @@ export default function CoreEvolution() {
         className="relative w-full max-w-xl aspect-[3/2]"
         aria-hidden="true"
       >
-        {/* Structural detail layers — hidden by default, faded in near rest */}
         <g ref={circuitGroupRef} style={{ opacity: 0 }}>
           {CIRCUIT_SEGMENTS.map(([[x1, y1], [x2, y2]], i) => (
             <line
@@ -364,7 +417,6 @@ export default function CoreEvolution() {
           ))}
         </g>
 
-        {/* The particle layer — always visible, drives the shatter/reform */}
         {Array.from({ length: NUM_PARTICLES }).map((_, i) => (
           <circle
             key={i}
@@ -387,7 +439,7 @@ export default function CoreEvolution() {
               captionRefs.current[i] = el;
             }}
             className="absolute inset-0 flex items-center justify-center font-display text-xl md:text-2xl font-bold text-foreground text-center whitespace-nowrap"
-            style={{ opacity: i === 0 ? 1 : 0 }}
+            style={{ opacity: i === 0 ? 0 : 0 }}
           >
             {label}
           </p>
