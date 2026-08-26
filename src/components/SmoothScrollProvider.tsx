@@ -42,9 +42,23 @@ export default function SmoothScrollProvider({
     gsap.ticker.add(raf);
     gsap.ticker.lagSmoothing(0);
 
+    // Whenever GSAP recalculates trigger positions (e.g. a pin spacer gets
+    // inserted, or the page height changes), tell Lenis to re-measure the
+    // page too — otherwise Lenis can think scrolling has ended before a
+    // pinned scrub animation has actually finished.
+    const handleRefresh = () => lenis.resize();
+    ScrollTrigger.addEventListener("refresh", handleRefresh);
+
+    // Recalculate once more after everything, including images, has
+    // actually finished loading — image loads shift page height too.
+    const handleLoad = () => ScrollTrigger.refresh();
+    window.addEventListener("load", handleLoad);
+
     return () => {
       lenis.destroy();
       gsap.ticker.remove(raf);
+      ScrollTrigger.removeEventListener("refresh", handleRefresh);
+      window.removeEventListener("load", handleLoad);
       setLenisInstance(null);
     };
   }, []);
