@@ -14,12 +14,12 @@ const EVENTS = [
     title: "PROMPTED",
     subtitle: "Prompt Engineering Workshop",
     description:
-      "A hands-on session on writing effective prompts and understanding how LLMs interpret them — from basic structure to advanced technique.",
+      "A hands-on session on writing effective prompts and understanding how LLMs interpret them, from basic structure to advanced technique.",
     date: "9 August 2026",
     image: "/images/prompted_workshop.jpeg",
   },
   {
-    status: "Ongoing — 4/5 sessions",
+    status: "Ongoing, 4/5 sessions",
     title: "Arduino Workshop Series",
     subtitle: "Hardware & Embedded Systems",
     description:
@@ -32,7 +32,7 @@ const EVENTS = [
     title: "Computer Vision Bootcamp",
     subtitle: "AI That Sees",
     description:
-      "An intensive bootcamp on building computer vision systems from the ground up — image processing fundamentals through to working models.",
+      "An intensive bootcamp on building computer vision systems from the ground up, image processing fundamentals through to working models.",
     date: "Starts 31 August 2026",
     image: "/images/CV_bootcamp.jpeg",
   },
@@ -79,17 +79,17 @@ export default function EventsShowcase() {
       });
 
       // Step 1: card 1 wipes in over card 0; card 0 recedes down-right
-      tl.to(cards[0], { x: "35%", y: "25%", scale: 0.88, opacity: 0.35 }, 0)
+      tl.to(cards[0], { x: "35%", y: "25%", scale: 0.88, opacity: 0.35, duration: 1 }, 0)
         .to(
           cards[1],
-          { x: "0%", y: "0%", scale: 1, opacity: 1, clipPath: "circle(150% at 50% 50%)" },
+          { x: "0%", y: "0%", scale: 1, opacity: 1, clipPath: "circle(150% at 50% 50%)", duration: 1 },
           0
         )
         // Step 2: card 2 wipes in over card 1; card 1 recedes down-right
-        .to(cards[1], { x: "35%", y: "25%", scale: 0.88, opacity: 0.35 }, 1)
+        .to(cards[1], { x: "35%", y: "25%", scale: 0.88, opacity: 0.35, duration: 1 }, 1)
         .to(
           cards[2],
-          { x: "0%", y: "0%", scale: 1, opacity: 1, clipPath: "circle(150% at 50% 50%)" },
+          { x: "0%", y: "0%", scale: 1, opacity: 1, clipPath: "circle(150% at 50% 50%)", duration: 1 },
           1
         );
     },
