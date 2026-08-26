@@ -1,28 +1,5 @@
 import FadeUp from "./animations/FadeUp";
-import ScaleOnScroll from "./animations/ScaleOnScroll";
 import SharpenIn from "./animations/SharpenIn";
-
-const FOCUS_ITEMS = [
-  {
-    label: "AI, from scratch",
-    description:
-      "Not just prompting — building the models yourself, from the ground up.",
-  },
-  {
-    label: "Robotics",
-    description:
-      "Systems that operate in the physical world, not just on a screen.",
-  },
-  {
-    label: "Emerging trends",
-    description: "Dissecting what's next in CS before it goes mainstream.",
-  },
-  {
-    label: "Engineering fundamentals",
-    description:
-      "The unglamorous basics that quietly make you exceptional.",
-  },
-];
 
 export default function WhatWeDo() {
   return (
@@ -40,7 +17,7 @@ export default function WhatWeDo() {
       </SharpenIn>
 
       <FadeUp delay={0.1}>
-        <p className="font-body text-muted max-w-2xl mb-20 leading-relaxed">
+        <p className="font-body text-muted max-w-2xl leading-relaxed">
           We&apos;re a community of CS students who think the most
           interesting questions in tech aren&apos;t purely technical —
           they&apos;re ethical, societal, uncomfortable. We think the people
@@ -49,22 +26,6 @@ export default function WhatWeDo() {
           deliberately ahead of the curve.
         </p>
       </FadeUp>
-
-      <div className="grid sm:grid-cols-2 gap-6">
-        {FOCUS_ITEMS.map((item) => (
-          <ScaleOnScroll key={item.label}>
-            <div className="border border-border bg-surface/50 rounded-2xl p-6 backdrop-blur-sm hover:border-accent/50 transition-colors h-full">
-              <span className="inline-block w-2 h-2 bg-accent rounded-full mb-4" />
-              <h3 className="font-display text-xl font-bold text-foreground mb-2">
-                {item.label}
-              </h3>
-              <p className="font-body text-sm text-muted leading-relaxed">
-                {item.description}
-              </p>
-            </div>
-          </ScaleOnScroll>
-        ))}
-      </div>
     </section>
   );
 }
