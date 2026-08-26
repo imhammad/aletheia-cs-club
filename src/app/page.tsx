@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
+import BrandStory from "@/components/BrandStory";
 import WhatWeDo from "@/components/WhatWeDo";
 import CoreEvolution from "@/components/CoreEvolution";
 import EventsShowcase from "@/components/EventsShowcase";
@@ -13,10 +14,11 @@ export default function Home() {
       <Navbar />
       <main className="relative z-10 bg-background mb-[420px]">
         <Hero />
+        <BrandStory />
         <WhatWeDo />
-        <CoreEvolution />
         <EventsShowcase />
         <WhatWeFocusOn />
+        <CoreEvolution />
         <JoinSection />
       </main>
       <Footer />
