@@ -19,7 +19,7 @@ export default function WhatWeDo() {
       <FadeUp delay={0.1}>
         <p className="font-body text-muted max-w-2xl leading-relaxed">
           We&apos;re a community of CS students who think the most
-          interesting questions in tech aren&apos;t purely technical —
+          interesting questions in tech aren&apos;t purely technical,
           they&apos;re ethical, societal, uncomfortable. We think the people
           who sit with those questions while still building things are the
           ones who actually change something. Our sessions are hands-on and

@@ -27,7 +27,7 @@ export default function JoinSection() {
       <FadeUp delay={0.15}>
         <MagneticWrapper strength={0.2}>
           <a
-            href="mailto:hello@aletheiacsclub.com"
+            href="mailto:hammadhassan319@gmail.com"
             className="inline-block font-mono text-sm uppercase tracking-widest bg-accent text-background px-8 py-4 rounded-full hover:bg-accent-light transition-colors"
           >
             Get In Touch

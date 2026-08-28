@@ -6,7 +6,7 @@ const FOCUS_ITEMS = [
   {
     label: "AI, from scratch",
     description:
-      "Not just prompting — building the models yourself, from the ground up.",
+      "Not just prompting, building the models yourself, from the ground up.",
   },
   {
     label: "Robotics",

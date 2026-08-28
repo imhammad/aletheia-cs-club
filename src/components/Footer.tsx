@@ -20,20 +20,24 @@ export default function Footer() {
             ALETHEIA
           </p>
           <p className="font-body text-sm text-muted max-w-xs">
-            Albukhary International University · Advisor: Prof. Dr. Zurinahni
+            Developed by Hammad Hassan
+          </p>
+          <p className="font-body text-sm text-muted max-w-xs">
+            Albukhary International University · <br></br>
+            Advisor: Prof. Dr. Zurinahni
             Zainol
           </p>
         </div>
 
         <div className="flex gap-8 font-mono text-xs uppercase tracking-widest text-muted">
-          <a href="#" className="hover:text-accent-light transition-colors">
+          <a href="https://www.instagram.com/aletheiacs_?igsi=MXdwNDVpYzB0bWdmYg==" className="hover:text-accent-light transition-colors">
             Instagram
           </a>
-          <a href="#" className="hover:text-accent-light transition-colors">
-            GitHub
+          <a href="https://www.linkedin.com/company/aletheia-cs/" className="hover:text-accent-light transition-colors">
+            LinkedIn
           </a>
           <a 
-            href="mailto:hello@aletheiacsclub.com"
+            href="mailto:hammadhassan319@gmail.com"
             className="hover:text-accent-light transition-colors"
           >
             Email
