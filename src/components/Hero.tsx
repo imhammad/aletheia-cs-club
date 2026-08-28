@@ -3,20 +3,25 @@
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import MorphingOrb from "./hero/MorphingOrb";
 import ParticleField from "./hero/ParticleField";
 import { usePrefersReducedMotion } from "../hooks/usePrefersReducedMotion";
+
+// Register ScrollTrigger plugin
+gsap.registerPlugin(ScrollTrigger);
+
+const SUBTITLE_TEXT = "A CS club community of builders, thinkers, and AI explorers.";
 
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
   const orbRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = usePrefersReducedMotion();
 
-  // Entrance timeline — always runs once on mount, regardless of the
-  // reduced-motion preference. A short one-time fade-in isn't the kind of
-  // continuous motion that preference is meant to suppress.
+  // Entrance and Scroll timelines
   useGSAP(
     () => {
+      // 1. Entrance Animation (Meteor Crash)
       const tl = gsap.timeline({ delay: 0.3 });
 
       tl.from(".hero-eyebrow", {
@@ -37,9 +42,19 @@ export default function Hero() {
           },
           "-=0.3"
         )
+        // Meteor crash effect for the subtitle words
         .from(
-          ".hero-subtitle",
-          { opacity: 0, y: 20, duration: 0.6, ease: "power3.out" },
+          ".meteor-word",
+          {
+            opacity: 0,
+            y: -300,
+            z: 400,
+            scale: 3,
+            rotateX: 90,
+            stagger: 0.08,
+            duration: 1.2,
+            ease: "bounce.out",
+          },
           "-=0.4"
         )
         .from(
@@ -48,12 +63,34 @@ export default function Hero() {
           "-=0.9"
         )
         .from(".hero-scroll-cue", { opacity: 0, duration: 0.6 }, "-=0.2");
+
+      // 2. Scroll Animation (Immediate Shatter and Fall)
+      if (!prefersReducedMotion) {
+        const scrollTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: "top top",
+            end: "40% top", // Ends earlier so it shatters on less scroll
+            scrub: 1, 
+          },
+        });
+
+        // Falls down immediately into pieces
+        scrollTl.to(".meteor-word", {
+          y: "100vh",
+          rotationZ: "random(-120, 120)",
+          rotationX: "random(-90, 90)",
+          opacity: 0,
+          duration: 2,
+          stagger: 0.02,
+          ease: "power2.in",
+        });
+      }
     },
-    { scope: containerRef }
+    { scope: containerRef, dependencies: [prefersReducedMotion] }
   );
 
-  // Cursor parallax — separate effect, gated by the reduced-motion
-  // preference, safe to tear down/rebuild independently of the entrance.
+  // Cursor parallax
   useGSAP(
     () => {
       if (prefersReducedMotion) return;
@@ -100,6 +137,18 @@ export default function Hero() {
 
       <ParticleField />
 
+      {/* Meteor Subtitle (Positioned below navbar) */}
+      <div className="absolute top-24 left-0 w-full flex justify-center flex-wrap gap-x-4 md:gap-x-6 gap-y-2 px-6 z-20 [perspective:1000px]">
+        {SUBTITLE_TEXT.split(" ").map((word, index) => (
+          <span
+            key={index}
+            className="meteor-word inline-block font-body text-accent font-bold text-2xl md:text-4xl"
+          >
+            {word}
+          </span>
+        ))}
+      </div>
+
       {/* Morphing glass orb */}
       <div
         ref={orbRef}
@@ -122,10 +171,6 @@ export default function Hero() {
             Engineered.
           </span>
         </h1>
-
-        <p className="hero-subtitle font-body text-muted max-w-md">
-          A CS club community of builders, thinkers, and AI explorers.
-        </p>
       </div>
 
       <div className="hero-scroll-cue absolute bottom-10 flex flex-col items-center gap-2">

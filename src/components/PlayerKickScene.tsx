@@ -15,10 +15,9 @@ const Canvas = dynamic(
   { ssr: false }
 );
 
-// PlayerKickScene.tsx
 
 const ENTER_START = 0.03;
-const KICK_START = 0.23; // Spawns the ball earlier, perfectly synced with the forward swing
+const KICK_START = 0.23; 
 const ANIM_END = 0.38;   
 const IMPACT = 0.46;
 const DIRT_END = 0.62;
