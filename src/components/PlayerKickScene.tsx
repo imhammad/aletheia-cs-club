@@ -15,12 +15,14 @@ const Canvas = dynamic(
   { ssr: false }
 );
 
+// PlayerKickScene.tsx
+
 const ENTER_START = 0.03;
-const ANIM_END = 0.5;
-const KICK_START = 0.38;
-const IMPACT = 0.55;
-const DIRT_END = 0.72;
-const TEXT_IN = 0.62;
+const KICK_START = 0.23; // Spawns the ball earlier, perfectly synced with the forward swing
+const ANIM_END = 0.38;   
+const IMPACT = 0.46;
+const DIRT_END = 0.62;
+const TEXT_IN = 0.52;
 
 const PARTICLE_COUNT = 40;
 const PARTICLE_SEEDS = Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
@@ -40,7 +42,6 @@ export default function PlayerKickScene() {
 
   useGSAP(
     () => {
-      // Only load the 3D scene once the user actually scrolls near it
       ScrollTrigger.create({
         trigger: sectionRef.current,
         start: "top bottom",
@@ -106,9 +107,16 @@ export default function PlayerKickScene() {
             <ambientLight intensity={0.7} />
             <directionalLight position={[3, 5, 4]} intensity={1.1} />
             <directionalLight position={[-4, 1, 2]} intensity={0.5} color="#e37b3f" />
+
             <Suspense fallback={null}>
               <PlayerModel progressRef={progressRef} enterStart={ENTER_START} animEnd={ANIM_END} />
-              <Ball progressRef={progressRef} kickStart={KICK_START} kickEnd={IMPACT} />
+              <Ball
+                progressRef={progressRef}
+                enterStart={ENTER_START}
+                animEnd={ANIM_END}
+                kickStart={KICK_START}
+                kickEnd={IMPACT}
+              />
             </Suspense>
           </Canvas>
         </div>

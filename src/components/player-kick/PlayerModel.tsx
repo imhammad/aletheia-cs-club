@@ -4,6 +4,11 @@ import { useEffect, useRef } from "react";
 import { useGLTF, useAnimations } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { getPlayerTransform } from "./playerTransform";
+
+// The Mixamo clip contains run + kick + extra footage afterward, we only
+// want to ever play through the kick, never into what comes after it.
+const CLIP_TRIM = 0.585;
 
 export default function PlayerModel({
   progressRef,
@@ -22,7 +27,7 @@ export default function PlayerModel({
     const firstAction = Object.values(actions)[0];
     if (firstAction) {
       firstAction.reset().play();
-      firstAction.paused = true; // we drive time manually via scroll
+      firstAction.paused = true;
     }
   }, [actions]);
 
@@ -33,29 +38,14 @@ export default function PlayerModel({
 
     const p = progressRef.current;
     const clip = firstAction.getClip();
-    const localRaw = (p - enterStart) / (animEnd - enterStart);
-    const local = Math.min(Math.max(localRaw, 0), 1);
+    const { x, y, z, scale, local } = getPlayerTransform(p, enterStart, animEnd);
 
-    // Scrub the clip's playback time directly to match scroll position
-    firstAction.time = local * clip.duration;
+    firstAction.time = local * clip.duration * CLIP_TRIM;
     mixer.update(0);
 
-    // Runs in from far/top-right, growing as he approaches the camera
-    const startPos = { x: 3.5, y: 1.2, z: -13 };
-    const endPos = { x: 0.4, y: -1.2, z: -3 };
-    g.position.set(
-      startPos.x + (endPos.x - startPos.x) * local,
-      startPos.y + (endPos.y - startPos.y) * local,
-      startPos.z + (endPos.z - startPos.z) * local
-    );
-
-    const startScale = 0.7;
-    const endScale = 2.2;
-    g.scale.setScalar(startScale + (endScale - startScale) * local);
-
-    // Math.PI / 2 or -Math.PI / 2
+    g.position.set(x, y, z);
+    g.scale.setScalar(scale);
     g.rotation.y = 0;
-
     g.visible = p >= enterStart - 0.02;
   });
 

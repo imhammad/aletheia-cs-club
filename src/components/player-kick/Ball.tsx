@@ -3,6 +3,7 @@
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { getBallTransform } from "./playerTransform";
 
 function createBallTexture() {
   const canvas = document.createElement("canvas");
@@ -28,10 +29,14 @@ function createBallTexture() {
 
 export default function Ball({
   progressRef,
+  enterStart,
+  animEnd,
   kickStart,
   kickEnd,
 }: {
   progressRef: React.MutableRefObject<number>;
+  enterStart: number;
+  animEnd: number;
   kickStart: number;
   kickEnd: number;
 }) {
@@ -41,27 +46,31 @@ export default function Ball({
   useFrame(() => {
     const mesh = meshRef.current;
     if (!mesh) return;
-    const p = progressRef.current;
+    const t = getBallTransform(
+      progressRef.current,
+      enterStart,
+      animEnd,
+      kickStart,
+      kickEnd
+    );
 
-    if (p < kickStart || p > kickEnd) {
-      mesh.visible = false;
-      return;
-    }
+    mesh.visible = t.visible;
+    if (!t.visible) return;
 
-    mesh.visible = true;
-    const local = (p - kickStart) / (kickEnd - kickStart);
-    const eased = local * local; // accelerates — slow start, rockets forward
-
-    mesh.position.set(0.5 - eased * 0.5, -0.8 + eased * 0.4, -3 + eased * 7);
-    mesh.scale.setScalar(0.15 + eased * 0.9);
+    mesh.position.set(t.x, t.y, t.z);
+    mesh.scale.setScalar(t.scale);
     mesh.rotation.x += 0.3;
     mesh.rotation.y += 0.2;
   });
 
-  return (
-    <mesh ref={meshRef} visible={false}>
+return (
+    <mesh ref={meshRef} visible={false} renderOrder={999}>
       <sphereGeometry args={[0.3, 24, 24]} />
-      <meshStandardMaterial map={texture} roughness={0.5} />
+      <meshStandardMaterial 
+        map={texture} 
+        roughness={0.5} 
+        depthTest={false} 
+      />
     </mesh>
   );
 }
