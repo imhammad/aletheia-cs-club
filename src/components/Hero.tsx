@@ -22,7 +22,7 @@ export default function Hero() {
   useGSAP(
     () => {
       // 1. Entrance Animation (Meteor Crash)
-      const tl = gsap.timeline({ delay: 0.3 });
+      const tl = gsap.timeline({ delay: 3.5 });
 
       tl.from(".hero-eyebrow", {
         opacity: 0,
