@@ -49,14 +49,23 @@ Aletheia's website was designed around a simple principle: a computer science cl
 
 src/
 app/ Route entry point and global styles
+
 components/ All site sections and shared UI components
+
 animations/ Reusable scroll-animation primitives
+
 core-evolution/ Particle-morph centerpiece stage logic
+
 hero/ Hero section assets and effects
+
 player-kick/ Three.js player and ball logic
+
 hooks/ Shared hooks (for example, reduced-motion detection)
+
 public/
+
 models/ Three-dimensional character asset
+
 images/ Event photography
 
 
