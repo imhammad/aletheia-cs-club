@@ -47,8 +47,7 @@ Aletheia's website was designed around a simple principle: a computer science cl
 
 ## Project Structure
 
-src/
-app/ Route entry point and global styles
+src/app/ Route entry point and global styles
 
 components/ All site sections and shared UI components
 
@@ -62,9 +61,7 @@ player-kick/ Three.js player and ball logic
 
 hooks/ Shared hooks (for example, reduced-motion detection)
 
-public/
-
-models/ Three-dimensional character asset
+public/models/ Three-dimensional character asset
 
 images/ Event photography
 
