@@ -2,7 +2,7 @@
 
 **Truth, Engineered.**
 
-[Live Site](#link)
+[Live Site](https://aletheia-cs-club.vercel.app/)
 
 A fully animated, scroll-driven portfolio website for Aletheia CS Club, a computer science club at Albukhary International University. The site was built from scratch as a showcase of the club's identity, activities, and technical focus areas, with an emphasis on distinctive, hand-built scroll animation rather than templated design.
 
