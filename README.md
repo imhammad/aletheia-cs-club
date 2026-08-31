@@ -100,6 +100,7 @@ Aletheia's activities to date include:
 - **PROMPTED**, a hands-on prompt engineering workshop covering how large language models work, prompting strategy, and practical technique, run in August 2026.
 - An ongoing **Arduino workshop series**, taking members from foundational embedded systems concepts through to real hardware projects.
 - An upcoming **Computer Vision Bootcamp**, covering image processing fundamentals through to working models.
+  
 
 ## Acknowledgments
 
